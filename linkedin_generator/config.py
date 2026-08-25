@@ -25,7 +25,7 @@ def get_llm():
             "name": "Groq",
             "init_func": lambda: ChatGroq(
                 api_key=os.getenv("GROQ_API_KEY"),
-                model=os.getenv("GROQ_MODEL", "llama3-8b-8192"),
+                model=os.getenv("GROQ_MODEL", "llama-3.1-8b-instant"),
                 temperature=0.7,
             )
         })
@@ -36,7 +36,7 @@ def get_llm():
             "name": "Cohere",
             "init_func": lambda: ChatCohere(
                 cohere_api_key=os.getenv("COHERE_API_KEY"),
-                model=os.getenv("COHERE_MODEL", "command-r"),
+                model=os.getenv("COHERE_MODEL", "command-r-plus"),
                 temperature=0.7,
             )
         })
@@ -67,14 +67,13 @@ def get_llm():
         })
 
     # 5. OVH Kepler (Qwen Guard Gen 8B)
-    # OVH endpoint is unauthenticated, but ChatOpenAI expects an API key so we pass "dummy"
-    # Appending /v1 as it's typically required by ChatOpenAI. If it fails, remove /v1.
     ovh_url = os.getenv("OVH_KEPLER_URL", "https://qwen-guard-gen-8b.endpoints.kepler.ai.cloud.ovh.net/api/openai_compat/v1")
-    if os.getenv("USE_OVH_KEPLER", "true").lower() == "true":
+    ovh_key = os.getenv("OVH_API_KEY")
+    if os.getenv("USE_OVH_KEPLER", "false").lower() == "true" and ovh_key:
         providers.append({
             "name": "OVH Kepler",
             "init_func": lambda: ChatOpenAI(
-                api_key="dummy",
+                api_key=ovh_key,
                 base_url=ovh_url,
                 model="qwen-guard-gen-8b", 
                 temperature=0.7,
