@@ -283,6 +283,54 @@ div[data-testid="stAlert"] {
     color: #a5b4fc !important;
     border-radius: 12px !important;
 }
+
+/* ── Topic Input ─────────────────────────────────────────────── */
+.topic-input-wrap {
+    max-width: 700px;
+    margin: 0 auto 1.5rem;
+}
+.topic-input-label {
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: #64748b;
+    margin-bottom: 0.5rem;
+}
+.topic-mode-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.72rem;
+    font-weight: 600;
+    padding: 0.3rem 0.8rem;
+    border-radius: 999px;
+    margin-bottom: 1rem;
+}
+.topic-mode-badge.auto {
+    background: rgba(99,102,241,0.12);
+    border: 1px solid rgba(99,102,241,0.3);
+    color: #818cf8;
+}
+.topic-mode-badge.custom {
+    background: rgba(34,197,94,0.12);
+    border: 1px solid rgba(34,197,94,0.3);
+    color: #4ade80;
+}
+div[data-testid="stTextInput"] input {
+    background: rgba(10,13,31,0.8) !important;
+    border: 1px solid rgba(99,102,241,0.25) !important;
+    border-radius: 10px !important;
+    color: #e2e8f0 !important;
+    font-family: 'Inter', sans-serif !important;
+    font-size: 0.95rem !important;
+    padding: 0.75rem 1rem !important;
+    transition: border-color 0.2s ease;
+}
+div[data-testid="stTextInput"] input:focus {
+    border-color: rgba(99,102,241,0.6) !important;
+    box-shadow: 0 0 0 3px rgba(99,102,241,0.1) !important;
+}
 </style>
 """, unsafe_allow_html=True)
 
@@ -331,6 +379,20 @@ agents_placeholder = st.empty()
 agents_placeholder.markdown(agents_html, unsafe_allow_html=True)
 
 st.markdown('<div class="divider"></div>', unsafe_allow_html=True)
+
+# ── Topic Input ───────────────────────────────────────────────────────────────
+col_l, col_mid, col_r = st.columns([1, 3, 1])
+with col_mid:
+    user_topic_input = st.text_input(
+        label="Topic (optional)",
+        placeholder="e.g. AI governance in enterprise, Technical debt as business risk, Future of work...",
+        help="Leave blank to let the system automatically discover and rank the best topic.",
+        label_visibility="visible",
+    )
+    if user_topic_input.strip():
+        st.markdown('<span class="topic-mode-badge custom">✦ Custom Topic Mode</span>', unsafe_allow_html=True)
+    else:
+        st.markdown('<span class="topic-mode-badge auto">⚙ Auto-Discover Mode</span>', unsafe_allow_html=True)
 
 # ── Generate Button ───────────────────────────────────────────────────────────
 col_l, col_c, col_r = st.columns([1, 2, 1])
@@ -394,28 +456,45 @@ def render_results(draft, review):
 if generate_btn:
     st.session_state.result = None
     done = []
-    steps = [
-        ("research", "🔍 Research Agent is gathering trending topics..."),
-        ("rank",     "📊 Ranking Agent is scoring topics..."),
-        ("write",    "✍️ Writer Agent is crafting your post..."),
-        ("review",   "⭐ Reviewer Agent is evaluating the post..."),
-    ]
+    user_topic = user_topic_input.strip()
 
-    initial_state = {"research": None, "ranking": None, "draft": None, "review": None, "revision_count": 0}
+    # Decide which steps to animate based on whether topic was provided
+    if user_topic:
+        # Skip research & rank — go straight to write & review
+        active_steps = [
+            ("write",  "✍️ Writer Agent is crafting your post on: " + user_topic + "..."),
+            ("review", "⭐ Reviewer Agent is evaluating the post..."),
+        ]
+        # Mark research & rank as skipped (show as done/grey)
+        render_agents(active_key="write", done_keys=[])
+    else:
+        active_steps = [
+            ("research", "🔍 Research Agent is gathering trending topics..."),
+            ("rank",     "📊 Ranking Agent is scoring topics..."),
+            ("write",    "✍️ Writer Agent is crafting your post..."),
+            ("review",   "⭐ Reviewer Agent is evaluating the post..."),
+        ]
+
+    initial_state = {
+        "user_topic": user_topic or None,
+        "research": None,
+        "ranking": None,
+        "draft": None,
+        "review": None,
+        "revision_count": 0,
+    }
 
     try:
         with st.spinner(""):
-            for step_key, step_msg in steps:
+            for step_key, step_msg in active_steps:
                 render_agents(active_key=step_key, done_keys=done)
                 status_placeholder.info(step_msg)
                 time.sleep(0.3)
 
             final_state = st.session_state.app.invoke(initial_state)
 
-            for step_key, _ in steps:
-                done.append(step_key)
-
-            render_agents(done_keys=done)
+            all_done = ["research", "rank", "write", "review"]
+            render_agents(done_keys=all_done)
             status_placeholder.success("✅ Post generated and approved!")
 
             draft = final_state.get("draft")
