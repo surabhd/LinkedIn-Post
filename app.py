@@ -347,7 +347,7 @@ st.markdown("""
 <div class="hero">
     <div class="hero-badge">✦ Powered by GenAI</div>
     <h1 class="hero-title">LinkedIn Content Generator</h1>
-    <p class="hero-sub">Executive thought leadership posts from the perspective of a Principal Architect</p>
+    <p class="hero-sub">Executive thought leadership posts from the perspective of an Architect/p>
 </div>
 """, unsafe_allow_html=True)
 
