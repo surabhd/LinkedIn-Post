@@ -2,24 +2,43 @@ from langchain_core.prompts import ChatPromptTemplate
 from linkedin_generator.config import get_llm
 from linkedin_generator.models import PostDraft
 from linkedin_generator.prompts import WRITER_AGENT_PROMPT
+from linkedin_generator.humanizer import humanize
+
 
 def run_writer(topic_title: str, topic_summary: str, feedback: str = None) -> PostDraft:
     llm = get_llm()
     structured_llm = llm.with_structured_output(PostDraft)
-    
+
     prompt_messages = [
         ("system", WRITER_AGENT_PROMPT),
     ]
-    
-    user_prompt = f"Topic Title: {topic_title}\nTopic Summary: {topic_summary}\n\nPlease draft a LinkedIn post following the persona and guidelines."
-    
+
+    user_prompt = (
+        f"Topic Title: {topic_title}\n"
+        f"Topic Summary: {topic_summary}\n\n"
+        "Please draft a LinkedIn post following the persona and guidelines. "
+        "Remember: no buzzwords, no hollow openers, no fake statistics. "
+        "Write like a real executive speaking plainly and directly."
+    )
+
     if feedback:
-        user_prompt += f"\n\nPREVIOUS REVIEWER FEEDBACK TO INCORPORATE:\n{feedback}"
-        
+        user_prompt += (
+            f"\n\nPREVIOUS REVIEWER FEEDBACK — address every point:\n{feedback}\n"
+            "Also re-check: remove all banned buzzwords, hollow openers, and fabricated numbers."
+        )
+
     prompt_messages.append(("user", user_prompt))
-    
     prompt = ChatPromptTemplate.from_messages(prompt_messages)
     chain = prompt | structured_llm
-    
-    response = chain.invoke({})
-    return response
+
+    draft: PostDraft = chain.invoke({})
+
+    # ── Run humanizer post-processor ──────────────────────────────────────────
+    cleaned_post = humanize(draft.post)
+    cleaned_hashtags = [h for h in dict.fromkeys(draft.hashtags)]  # deduplicate
+
+    return PostDraft(
+        topic=draft.topic,
+        post=cleaned_post,
+        hashtags=cleaned_hashtags,
+    )
