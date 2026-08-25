@@ -60,8 +60,9 @@ def get_llm():
             "init_func": lambda: ChatOpenAI(
                 api_key=os.getenv("NVIDIA_API_KEY"),
                 base_url=os.getenv("NVIDIA_BASE_URL", "https://integrate.api.nvidia.com/v1"),
-                model=os.getenv("NVIDIA_MODEL", "meta/llama3-70b-instruct"),
+                model=os.getenv("NVIDIA_MODEL", "nvidia/nemotron-3-super-120b-a12b"),
                 temperature=0.7,
+                model_kwargs={"extra_body": {"chat_template_kwargs": {"enable_thinking": True}}}
             )
         })
 
