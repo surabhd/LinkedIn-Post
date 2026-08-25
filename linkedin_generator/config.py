@@ -36,7 +36,7 @@ def get_llm():
             "name": "Cohere",
             "init_func": lambda: ChatCohere(
                 cohere_api_key=os.getenv("COHERE_API_KEY"),
-                model=os.getenv("COHERE_MODEL", "command-r-plus"),
+                model=os.getenv("COHERE_MODEL", "command-r"),
                 temperature=0.7,
             )
         })
