@@ -29,13 +29,23 @@ The system consists of 4 agents connected via LangGraph:
    
    pip install -r requirements.txt
    ```
-3. Copy `.env.example` to `.env` and adjust variables if needed:
+3. Copy `.env.example` to `.env` and fill in API keys for the providers you want to use. The app will randomly select a configured provider.
+
+## Cloud Deployment (Streamlit Community Cloud)
+
+To host this application on the cloud for free:
+1. Push this repository to a **private** GitHub repository.
+2. Do **not** commit your `.env` file to version control.
+3. Log in to [Streamlit Community Cloud](https://streamlit.io/cloud) with your GitHub account.
+4. Click **New app** and select your repository, branch, and `app.py` as the main file.
+5. **Secure Keys**: Before clicking Deploy, click on **Advanced settings** (or the **Secrets** section later) and paste your environment variables in TOML format:
+   ```toml
+   GROQ_API_KEY = "your-key"
+   NVIDIA_API_KEY = "your-key"
+   LLM7_API_KEY = "your-key"
+   # ... add others as needed
    ```
-   BASE_URL=http://localhost:1234/v1
-   API_KEY=lm-studio
-   MODEL_NAME=lmstudio-community/Meta-Llama-3-8B-Instruct-GGUF
-   ```
-4. Start LM Studio server.
+6. Click Deploy!
 
 ## Execution
 
