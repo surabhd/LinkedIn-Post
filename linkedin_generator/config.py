@@ -36,7 +36,7 @@ def get_llm():
             "name": "Cohere",
             "init_func": lambda: ChatCohere(
                 cohere_api_key=os.getenv("COHERE_API_KEY"),
-                model=os.getenv("COHERE_MODEL", "command-r-plus"),
+                model=os.getenv("COHERE_MODEL", "command-r-plus-08-2024"),
                 temperature=0.7,
             )
         })
@@ -48,7 +48,7 @@ def get_llm():
             "init_func": lambda: ChatOpenAI(
                 api_key=os.getenv("LLM7_API_KEY"),
                 base_url=os.getenv("LLM7_BASE_URL", "https://api.llm7.io/v1"),
-                model=os.getenv("LLM7_MODEL", "llama-3-8b"),
+                model=os.getenv("LLM7_MODEL", "default"),
                 temperature=0.7,
             )
         })
