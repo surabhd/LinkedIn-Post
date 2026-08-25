@@ -39,9 +39,15 @@ The system consists of 4 agents connected via LangGraph:
 
 ## Execution
 
-Run the system:
+### Command Line Interface
+Run the system in the terminal:
 ```bash
 python main.py
 ```
 
-The system will print the progress of each agent and output the final approved LinkedIn post.
+### Web User Interface
+Run the Streamlit web app:
+```bash
+streamlit run app.py
+```
+This will open a local web page in your browser where you can generate posts interactively.
