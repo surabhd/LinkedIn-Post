@@ -345,7 +345,7 @@ if "agent_states" not in st.session_state:
 # ── Hero ──────────────────────────────────────────────────────────────────────
 st.markdown("""
 <div class="hero">
-    <div class="hero-badge">✦ Powered by LM Studio &amp; LangGraph</div>
+    <div class="hero-badge">✦ Powered by GenAI</div>
     <h1 class="hero-title">LinkedIn Content Generator</h1>
     <p class="hero-sub">Executive thought leadership posts from the perspective of a Principal Architect</p>
 </div>
