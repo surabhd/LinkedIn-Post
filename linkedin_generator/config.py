@@ -100,9 +100,13 @@ def _build_provider_list() -> list:
     return providers
 
 
-class FallbackStructuredOutput:
+from langchain_core.runnables import Runnable
+from typing import Any, Optional
+
+
+class FallbackStructuredOutput(Runnable):
     """
-    A structured output wrapper that automatically falls back across
+    A LangChain-compatible Runnable that automatically falls back across
     providers if the current one raises an exception.
     Supports LangChain's `prompt | chain` pipe syntax.
     """
@@ -111,24 +115,24 @@ class FallbackStructuredOutput:
         self._providers = providers
         self._schema = schema
         self._prompt = prompt
-        self.succeeded_provider = None
-        self.succeeded_model = None
+        self.succeeded_provider: Optional[str] = None
+        self.succeeded_model: Optional[str] = None
 
     def __ror__(self, prompt):
         """Enable: prompt | FallbackStructuredOutput(...)"""
         return FallbackStructuredOutput(self._providers, self._schema, prompt)
 
-    def invoke(self, inputs: dict):
+    def invoke(self, inputs: Any, config=None, **kwargs) -> Any:
         last_error = None
         for provider in self._providers:
             try:
                 llm = provider["init_func"]()
                 structured = llm.with_structured_output(self._schema)
                 if self._prompt is not None:
-                    result = (self._prompt | structured).invoke(inputs)
+                    result = (self._prompt | structured).invoke(inputs, config)
                 else:
-                    result = structured.invoke(inputs)
-                # Record which provider won
+                    result = structured.invoke(inputs, config)
+                # Record winner
                 self.succeeded_provider = provider["name"]
                 self.succeeded_model = provider["model"]
                 logger.info(f"✅ Provider succeeded: {provider['name']} ({provider['model']})")
@@ -151,7 +155,6 @@ class FallbackLLM:
 
     def __init__(self, providers: list):
         self._providers = providers
-        # Expose the first provider's name/model as the "intended" provider
         first = providers[0] if providers else {}
         self.provider_name = first.get("name", "Unknown")
         self.model_name = first.get("model", "Unknown")
