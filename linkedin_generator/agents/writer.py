@@ -7,7 +7,6 @@ from linkedin_generator.humanizer import humanize
 
 def run_writer(topic_title: str, topic_summary: str, feedback: str = None) -> PostDraft:
     llm, provider_name, model_name = get_llm()
-    structured_llm = llm.with_structured_output(PostDraft)
 
     prompt_messages = [
         ("system", WRITER_AGENT_PROMPT),
@@ -29,18 +28,30 @@ def run_writer(topic_title: str, topic_summary: str, feedback: str = None) -> Po
 
     prompt_messages.append(("user", user_prompt))
     prompt = ChatPromptTemplate.from_messages(prompt_messages)
-    chain = prompt | structured_llm
+
+    # ── Build chain using FallbackStructuredOutput ────────────────────────────
+    # prompt | fallback_structured triggers FallbackStructuredOutput.__ror__
+    # returning a new FallbackStructuredOutput with the prompt stored inside.
+    fallback_structured = llm.with_structured_output(PostDraft)
+    chain = prompt | fallback_structured
 
     draft: PostDraft = chain.invoke({})
 
+    # ── Read which provider actually succeeded ────────────────────────────────
+    actual_provider = provider_name
+    actual_model = model_name
+    if hasattr(chain, "succeeded_provider") and chain.succeeded_provider:
+        actual_provider = chain.succeeded_provider
+        actual_model = chain.succeeded_model or model_name
+
     # ── Run humanizer post-processor ──────────────────────────────────────────
     cleaned_post = humanize(draft.post)
-    cleaned_hashtags = [h for h in dict.fromkeys(draft.hashtags)]  # deduplicate
+    cleaned_hashtags = list(dict.fromkeys(draft.hashtags))  # deduplicate
 
     return PostDraft(
         topic=draft.topic,
         post=cleaned_post,
         hashtags=cleaned_hashtags,
-        provider=provider_name,
-        model_name=model_name,
+        provider=actual_provider,
+        model_name=actual_model,
     )
