@@ -23,6 +23,8 @@ class PostDraft(BaseModel):
     topic: str = Field(description="The selected topic")
     post: str = Field(description="The full LinkedIn post text")
     hashtags: List[str] = Field(description="5-10 relevant hashtags")
+    provider: str = Field(default="", description="The LLM provider that generated the post")
+    model_name: str = Field(default="", description="The specific model used")
 
 class ReviewFeedback(BaseModel):
     approved: bool = Field(description="Whether the post is approved")

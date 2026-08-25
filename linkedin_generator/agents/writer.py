@@ -6,7 +6,7 @@ from linkedin_generator.humanizer import humanize
 
 
 def run_writer(topic_title: str, topic_summary: str, feedback: str = None) -> PostDraft:
-    llm = get_llm()
+    llm, provider_name, model_name = get_llm()
     structured_llm = llm.with_structured_output(PostDraft)
 
     prompt_messages = [
@@ -41,4 +41,6 @@ def run_writer(topic_title: str, topic_summary: str, feedback: str = None) -> Po
         topic=draft.topic,
         post=cleaned_post,
         hashtags=cleaned_hashtags,
+        provider=provider_name,
+        model_name=model_name,
     )

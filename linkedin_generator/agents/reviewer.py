@@ -4,7 +4,7 @@ from linkedin_generator.models import PostDraft, ReviewFeedback
 from linkedin_generator.prompts import REVIEWER_AGENT_PROMPT
 
 def run_reviewer(draft: PostDraft) -> ReviewFeedback:
-    llm = get_llm()
+    llm, _, _ = get_llm()
     structured_llm = llm.with_structured_output(ReviewFeedback)
     
     prompt = ChatPromptTemplate.from_messages([

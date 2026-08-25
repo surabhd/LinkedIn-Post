@@ -4,7 +4,7 @@ from linkedin_generator.models import ResearchOutput
 from linkedin_generator.prompts import RESEARCH_AGENT_PROMPT
 
 def run_researcher() -> ResearchOutput:
-    llm = get_llm()
+    llm, _, _ = get_llm()
     # Using structured output. Some local models might need specific prompting for JSON
     structured_llm = llm.with_structured_output(ResearchOutput)
     

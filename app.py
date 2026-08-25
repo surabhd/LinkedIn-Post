@@ -435,6 +435,10 @@ def render_results(draft, review):
             <div class="result-title">📌 {draft.topic}</div>
             <div class="post-text">{post_body}</div>
             <div class="hashtags">{tags_html}</div>
+            <div style="margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid rgba(255,255,255,0.06); display: flex; align-items: center; justify-content: space-between; font-size: 0.75rem; color: #64748b;">
+                <div><strong>Provider:</strong> <span style="color: #a5b4fc;">{draft.provider}</span></div>
+                <div><strong>Model:</strong> <span style="color: #a5b4fc;">{draft.model_name}</span></div>
+            </div>
         </div>
         """, unsafe_allow_html=True)
         # Copy-friendly text area

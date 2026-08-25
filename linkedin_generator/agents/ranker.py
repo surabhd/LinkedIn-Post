@@ -4,7 +4,7 @@ from linkedin_generator.models import ResearchOutput, RankingOutput
 from linkedin_generator.prompts import RANKING_AGENT_PROMPT
 
 def run_ranker(research_output: ResearchOutput) -> RankingOutput:
-    llm = get_llm()
+    llm, _, _ = get_llm()
     structured_llm = llm.with_structured_output(RankingOutput)
     
     prompt = ChatPromptTemplate.from_messages([

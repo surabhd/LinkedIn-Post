@@ -95,6 +95,17 @@ def get_llm():
 
     # Randomly select a provider
     selected = random.choice(providers)
-    logger.info(f"Randomly selected LLM Provider: {selected['name']}")
     
-    return selected["init_func"]()
+    # Initialize the LLM
+    llm_instance = selected["init_func"]()
+    
+    # Extract model name safely
+    model_name = "Unknown"
+    if hasattr(llm_instance, "model_name"):
+        model_name = llm_instance.model_name
+    elif hasattr(llm_instance, "model"):
+        model_name = llm_instance.model
+        
+    logger.info(f"Randomly selected LLM Provider: {selected['name']} ({model_name})")
+    
+    return llm_instance, selected["name"], model_name
